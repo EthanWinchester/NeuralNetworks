@@ -1,0 +1,80 @@
+class Node:
+    def __init__(self, number, value):
+        self.number = number
+        self.value = value
+
+
+class Connection:
+    def __init__(self, input_number, output_number, weight, innovation_number):
+        self.input_number = input_number
+        self.output_number = output_number
+        self.weight = weight
+        self.enabled = True
+        self.innovation_number = innovation_number
+
+
+class Network:
+    def __init__(self, nodes_list, connections_list, inputs, outputs):
+        self.nodes = nodes_list
+        self.connections = connections_list
+        self.inputs = inputs
+        self.outputs = outputs
+        self.processed_order = []
+
+    def clear_order(self):
+        clear_order = []
+        for j in range(0, len(self.nodes)):
+            x = True
+            for i in self.connections:
+                y = True
+                for k in range(0, len(clear_order)):
+                    if i.input_number == clear_order[k]:
+                        y = False
+                    if i.output_number == clear_order[k]:
+                        y = False
+                if y:
+                    if i.output_number == j:
+                        x = False
+            if x:
+                clear_order.append(j)
+        return clear_order
+    # this creates an ordered list of which nodes ought to be ready to send outputs through connections
+
+    def process_order(self):
+        for i in range(0, len(self.nodes)):
+            intake = []
+            for j in range(0, len(self.connections)):
+                if self.connections[j].output_number == i:
+                    intake.append(j)
+            self.processed_order.append(intake)
+        return self.processed_order
+
+    def process_network(self, inputs):
+        for i in self.nodes:
+            i.value = 0
+        for i in range(0, len(self.inputs)):
+            self.nodes[self.inputs[i]].value = inputs[i]
+        for i in self.nodes:
+            weighted_sum = 0
+            for j in self.processed_order[i.number]:
+                weighted_sum += self.connections[j].weight * self.nodes[self.connections[j].input_number].value
+            i.value += weighted_sum
+        output_list = []
+        for i in self.outputs:
+            output_list.append(self.nodes[i].value)
+        return output_list
+
+    def add_node(self, connection, number, innovation_in, innovation_out):
+        w = Network(self.nodes, self.connections, self.inputs, self.outputs)
+        w.nodes.append(Node(number, 0))
+        w.connections[connection].enabled = False
+        w.connections.append(Connection(q.connections[connection].input_number, number, 1, innovation_in))
+        w.connections.append(Connection(number, q.connections[connection].output_number,
+                                        q.connections[connection].weight, innovation_out))
+        return w
+
+
+class Neat:
+    def __init__(self):
+        self.networks = []
+        self.connection_innovations = []
