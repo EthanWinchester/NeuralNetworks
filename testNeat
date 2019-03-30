@@ -1,0 +1,37 @@
+a = Node(0, 1)
+b = Node(1, 1)
+c = Node(2, 1)
+d = Node(3, 0)
+e = Node(4, 0)
+f = Node(5, 0)
+connect_a = Connection(0, 3, 1, 1)
+connect_b = Connection(1, 3, 1, 2)
+connect_c = Connection(0, 4, 1, 3)
+connect_d = Connection(2, 4, 1, 4)
+connect_e = Connection(1, 5, 1, 5)
+connect_f = Connection(3, 5, 1, 6)
+connect_g = Connection(4, 5, 1, 7)
+q = Network([a, b, c, d, e, f],
+            [connect_a, connect_b, connect_c, connect_d, connect_e, connect_f, connect_g], [0, 1, 2], [5])
+# test network q has three inputs 1, 2, 3
+# it also has two internal nodes 4, 5
+# and one output node 6
+# it has seven connections 1, 2 go to 4
+# 1, 3 go to 5 and 4, 5, 2 go to 6
+#
+#
+#
+#          f
+#         /|\
+#        / | \
+#       /  |  \
+#      /   |   \
+#      b   |  __e
+#     /\   |_/   \
+#    /  \_/|      \
+#   / _/ \ |       \
+#  /_/    \|        \
+# a        b         c
+print(q.clear_order())
+print(q.process_order())
+print(q.process_network([1, 1, 1]))
