@@ -1,0 +1,190 @@
+import random as rn
+
+
+class Connection:
+    def __init__(self, in_node, out_node, weight, innovation):
+        self.in_node = in_node
+        self.out_node = out_node
+        self.weight = weight
+        self.enabled = True
+        self.innovation = innovation
+
+    def randomize_weight(self):
+        self.weight = rn.uniform(-2, 2)
+
+    def flip_connection(self):
+        if self.enabled:
+            self.enabled = False
+        else:
+            self.enabled = True
+
+    def adjust_weight(self):
+        self.weight *= 1 + rn.uniform(-.2, .2)
+
+
+class Network:
+    def __init__(self, input_size, output_size, node_count, connections):
+        self.input_size = input_size
+        self.output_size = output_size
+        self.node_count = node_count
+        self.connections = connections
+        self.parameters = []
+        for i in range(self.node_count):
+            self.parameters.append([])
+        for i in self.parameters:
+            i.append([])
+            i.append([])
+        for i in self.connections:
+            if i.enabled:
+                self.parameters[i.out_node][0].append(i.in_node)
+                self.parameters[i.out_node][1].append(i.weight)
+
+    def set_parameters(self):
+        clear_order = []
+        for i in range(self.node_count):
+            clear_order.append([])
+        for i in clear_order:
+            i.append([])
+            i.append([])
+        for i in self.connections:
+            if i.enabled:
+                clear_order[i.out_node][0].append(i.in_node)
+                clear_order[i.out_node][1].append(i.weight)
+        self.parameters = clear_order
+        return clear_order
+
+    def process(self, net_inputs):
+        def sigmoid(value):
+            a = 1/(1 + 2.718 ** (-value))
+            return a
+
+        def rectified_linear_unit(value):
+            if value < 0:
+                return 0
+            else:
+                return value
+
+        def weighted_sum(list_values, list_weights):
+            result = 0
+            for i in range(len(list_values)):
+                result += list_values[i] * list_weights[i]
+            return result
+
+        def node_process(node):
+            if len(self.parameters[node][0]) == 0:
+                if node < len(net_inputs):
+                    return net_inputs[node]
+            else:
+                in_node_value_list = []
+                for i in self.parameters[node][0]:
+                    in_node_value_list.append(node_process(i))
+                return weighted_sum(in_node_value_list, self.parameters[node][1])
+                # this line is where nonlinear activator goes around the weighted_sum
+
+        def find_output():
+            result = []
+            for i in range(self.output_size):
+                result.append(node_process(i + self.input_size))
+            return result
+
+        return find_output()
+
+    def find_node_parents(self, start_node):
+        ancestry = []
+
+        def recursive_tracking(start):
+            for i in self.parameters[start][0]:
+                ancestry.append(i)
+                recursive_tracking(i)
+
+        recursive_tracking(start_node)
+        ancestry.append(start_node)
+        return ancestry
+
+    def copy_net(self):
+        return Network(self.input_size, self.output_size, self.node_count, self.connections)
+
+    def adjust_random_weight(self):
+        self.connections[rn.randint(0, len(self.connections) - 1)].adjust_weight()
+
+    def randomize_random_weight(self):
+        self.connections[rn.randint(0, len(self.connections) - 1)].randomize_weight()
+
+    def flip_random_connection(self):
+        self.connections[rn.randint(0, len(self.connections) - 1)].flip_connection()
+
+
+class Neat:
+    def __init__(self, input_size, output_size):
+        self.innovations = {}
+        self.current_innovation = 0
+        self.input_size = input_size
+        self.output_size = output_size
+        self.networks = []
+
+    def generate_blank_network(self):
+        self.networks.append(Network(self.input_size, self.output_size, self.input_size + self.output_size, []))
+
+    def find_innovation(self, in_node, out_node):
+        q = (in_node, out_node)
+        if q in self.innovations:
+            return self.innovations[q]
+        else:
+            self.innovations[q] = self.current_innovation
+            self.current_innovation += 1
+            return self.current_innovation - 1
+
+    def process(self, net, net_input):
+        return self.networks[net].process(net_input)
+
+    def update_network(self, net):
+        self.networks[net].set_parameters()
+
+    def add_random_connection(self, net):
+        start = []
+        for i in range(self.networks[net].node_count):
+            start.append(i)
+        for i in range(self.networks[net].input_size, self.networks[net].input_size + self.networks[net].output_size):
+            if i in start:
+                start.remove(i)
+        a = rn.randint(0, len(start) - 1)
+        start_node = start[a]
+        out = []
+        for i in range(self.networks[net].node_count):
+            out.append(i)
+        for i in self.networks[net].find_node_parents(start_node):
+            if i in out:
+                out.remove(i)
+        for i in range(self.networks[net].input_size):
+            if i in out:
+                out.remove(i)
+        for i in self.networks[net].parameters[start_node][0]:
+            if i in out:
+                out.remove(i)
+        out_node = out[rn.randint(0, len(out) - 1)]
+        innovation = self.find_innovation(start_node, out_node)
+        self.networks[net].connections.append(Connection(start_node, out_node, rn.uniform(-2, 2), innovation))
+
+    def add_random_node(self, net):
+        connection = rn.randint(0, len(self.networks[net].connections) - 1)
+        a = self.networks[net].connections[connection].in_node
+        b = self.networks[net].connections[connection].out_node
+        c = self.networks[net].connections[connection].weight
+        innovation_one = self.find_innovation(a, self.networks[net].node_count)
+        innovation_two = self.find_innovation(self.networks[net].node_count, b)
+        self.networks[net].connections.append(Connection(a, self.networks[net].node_count, 1, innovation_one))
+        self.networks[net].connections.append(Connection(self.networks[net].node_count, b, c, innovation_two))
+        self.networks[net].node_count += 1
+        self.networks[net].connections.pop(connection)
+
+    def flip_random_connection(self, net):
+        self.networks[net].flip_random_connection()
+
+    def adjust_random_weight(self, net):
+        self.networks[net].adjust_random_weight()
+
+    def randomize_random_weight(self, net):
+        self.networks[net].randomize_random_weight()
+
+    def mutate_network(self):
+        pass
