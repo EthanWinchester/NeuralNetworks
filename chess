@@ -1,0 +1,229 @@
+from testing import *
+import copy as cp
+import numpy as np
+
+
+class ChessBoard:
+    def __init__(self):
+        self.board = [[2, 3, 4, 5, 6, 4, 3, 2],
+                      [1, 1, 1, 1, 1, 1, 1, 1],
+                      [0, 0, 0, 0, 0, 0, 0, 0],
+                      [0, 0, 0, 0, 0, 0, 0, 0],
+                      [0, 0, 0, 0, 0, 0, 0, 0],
+                      [0, 0, 0, 0, 0, 0, 0, 0],
+                      [-1, -1, -1, -1, -1, -1, -1, -1],
+                      [-2, -3, -4, -5, -6, -4, -3, -2]]
+        self.move_number = 0
+
+    def find(self):
+        possible_moves = []
+
+        def is_white_in_check(i, j):
+            pass
+
+        def white_rook_move(i, j):
+            n = 1
+            while i + n <= 7:
+                if self.board[i + n][j] == 0:
+                    possible_moves.append([i, j, i + n, j])
+                    n += 1
+                    continue
+                elif self.board[i + n][j] < 0:
+                    possible_moves.append([i, j, i + n, j])
+                    break
+                elif self.board[i + n][j] > 0:
+                    break
+            n = 1
+            while i - n >= 0:
+                if self.board[i - n][j] == 0:
+                    possible_moves.append([i, j, i - n, j])
+                    n += 1
+                    continue
+                elif self.board[i - n][j] < 0:
+                    possible_moves.append([i, j, i - n, j])
+                    break
+                elif self.board[i - n][j] > 0:
+                    break
+            n = 1
+            while j + n <= 7:
+                if self.board[i][j + n] == 0:
+                    possible_moves.append([i, j, i, j + n])
+                    n += 1
+                    continue
+                elif self.board[i][j + n] < 0:
+                    possible_moves.append([i, j, i, j + n])
+                    break
+                elif self.board[i][j + n] > 0:
+                    break
+            n = 1
+            while j - n >= 0:
+                if self.board[i][j - n] == 0:
+                    possible_moves.append([i, j, i, j - n])
+                    n += 1
+                    continue
+                elif self.board[i][j - n] < 0:
+                    possible_moves.append([i, j, i, j - n])
+                    break
+                elif self.board[i][j - n] > 0:
+                    break
+
+        def white_bishop_move(i, j):
+            n = 1
+            while i + n <= 7 and j + n <= 7:
+                if self.board[i + n][j + n] == 0:
+                    possible_moves.append([i, j, i + n, j + n])
+                    n += 1
+                    continue
+                elif self.board[i + n][j + n] < 0:
+                    possible_moves.append([i, j, i + n, j + n])
+                    break
+                elif self.board[i + n][j + n] > 0:
+                    break
+
+        def white_knight_move(i, j):
+            pass
+
+        def white_pawn_move(i, j):
+            pass
+
+        def white_king_move(i, j):
+            pass
+
+        def white_castling_conditions():
+            pass
+
+        def white_check_pruning():
+            pass
+
+        def is_black_in_check(i, j):
+            pass
+
+        def black_rook_move(i, j):
+            n = 1
+            while i + n <= 7:
+                if self.board[i + n][j] == 0:
+                    possible_moves.append([i, j, i + n, j])
+                    n += 1
+                    continue
+                elif self.board[i + n][j] > 0:
+                    possible_moves.append([i, j, i + n, j])
+                    break
+                elif self.board[i + n][j] < 0:
+                    break
+            n = 1
+            while i - n >= 0:
+                if self.board[i - n][j] == 0:
+                    possible_moves.append([i, j, i - n, j])
+                    n += 1
+                    continue
+                elif self.board[i - n][j] > 0:
+                    possible_moves.append([i, j, i - n, j])
+                    break
+                elif self.board[i - n][j] < 0:
+                    break
+            n = 1
+            while j + n <= 7:
+                if self.board[i][j + n] == 0:
+                    possible_moves.append([i, j, i, j + n])
+                    n += 1
+                    continue
+                elif self.board[i][j + n] > 0:
+                    possible_moves.append([i, j, i, j + n])
+                    break
+                elif self.board[i][j + n] < 0:
+                    break
+            n = 1
+            while j - n >= 0:
+                if self.board[i][j - n] == 0:
+                    possible_moves.append([i, j, i, j - n])
+                    n += 1
+                    continue
+                elif self.board[i][j - n] > 0:
+                    possible_moves.append([i, j, i, j - n])
+                    break
+                elif self.board[i][j - n] < 0:
+                    break
+
+        def black_bishop_move(i, j):
+            pass
+
+        def black_knight_move(i, j):
+            pass
+
+        def black_pawn_move(i, j):
+            pass
+
+        def black_king_move(i, j):
+            pass
+
+        def black_castling_conditions():
+            pass
+
+        def black_check_pruning():
+            pass
+
+        def find_white_moves():
+            for i in range(0, 8):
+                for j in range(0, 8):
+                    if self.board[i][j] == 0:
+                        continue
+                    elif self.board[i][j] == 1:
+                        white_pawn_move(i, j)
+                        continue
+                    elif self.board[i][j] == 2:
+                        white_rook_move(i, j)
+                        continue
+                    elif self.board[i][j] == 3:
+                        white_knight_move(i, j)
+                        continue
+                    elif self.board[i][j] == 4:
+                        white_bishop_move(i, j)
+                        continue
+                    elif self.board[i][j] == 5:
+                        white_rook_move(i, j)
+                        white_bishop_move(i, j)
+                        continue
+                    elif self.board[i][j] == 6:
+                        white_king_move(i, j)
+                        continue
+
+        def find_black_moves():
+            for i in range(0, 8):
+                for j in range(0, 8):
+                    if self.board[i][j] == 0:
+                        continue
+                    elif self.board[i][j] == 1:
+                        black_pawn_move(i, j)
+                        continue
+                    elif self.board[i][j] == 2:
+                        black_rook_move(i, j)
+                        continue
+                    elif self.board[i][j] == 3:
+                        black_knight_move(i, j)
+                        continue
+                    elif self.board[i][j] == 4:
+                        black_bishop_move(i, j)
+                        continue
+                    elif self.board[i][j] == 5:
+                        black_rook_move(i, j)
+                        black_bishop_move(i, j)
+                        continue
+                    elif self.board[i][j] == 6:
+                        black_king_move(i, j)
+                        continue
+
+        def find_turn():
+            if self.move_number % 2 == 0:
+                find_white_moves()
+                white_check_pruning()
+                white_castling_conditions()
+            else:
+                find_black_moves()
+                black_check_pruning()
+                black_castling_conditions()
+
+        find_turn()
+        return possible_moves
+
+    def move(self, move_list, board):
+        pass
